@@ -1,0 +1,11 @@
+// 해당 타입은 UI 사용 및 Props를 위한 FE Custom Type입니다.
+// 실제 타입은 BE API 응답에 따라 결정됩니다.
+
+export type User = {
+  id: number;
+  name: string;
+  isHost: boolean;
+  isReady: boolean;
+}
+
+export type CurrentPlayer = User;
