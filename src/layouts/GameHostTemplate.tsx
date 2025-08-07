@@ -3,19 +3,11 @@ import GameRoomChatSection from "@/components/layout/GameRoomChatSection";
 import InGameProblemInfo from "@/components/layout/InGameProblemInfo";
 import InGamePlayerQuestion from "@/components/layout/InGamePlayerQuestion";
 import InGamePlayerAnswer from "@/components/layout/InGamePlayerAnswer";
-import type { User } from "@/types/user";
+import useGameStore from "@/stores/gameStore";
 
-interface GameHostTemplatelProps {
-  players: User[];
-  currentPlayer: User;
-  isQuestion: boolean;
-}
+function GameHostTemplate() {
+  const currentQuestion = useGameStore((state) => state.currentQuestion);
 
-function GameHostTemplate({
-  players,
-  currentPlayer,
-  isQuestion,
-}: GameHostTemplatelProps) {
   return (
     <div className="grid gap-4">
       {/* 상단 고정 헤더 + 하부 (고정 크기 + 상대 크기) */}
@@ -32,7 +24,11 @@ function GameHostTemplate({
           <InGameProblemInfo />
 
           {/* 질문 응답 영역 */}
-          {isQuestion ? <InGamePlayerQuestion /> : <InGamePlayerAnswer />}
+          {currentQuestion?.type === "answer" ? (
+            <InGamePlayerAnswer />
+          ) : (
+            <InGamePlayerQuestion />
+          )}
         </div>
       </div>
     </div>

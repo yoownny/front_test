@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import type { RoomSummary } from '@/types/roomSummary';
+import type { RoomSummary } from '@/types/room/roomSummary';
 
 interface FilterState {
-  difficulties: ('easy' | 'normal' | 'hard')[];
+  difficulties: ('EASY' | 'NORMAL' | 'HARD')[];
   genres: string[];
-  problemTypes: ('existing' | 'custom')[];
+  problemTypes: ('ORIGINAL' | 'CUSTOM' | 'AI')[];
   searchQuery: string;
 }
 

@@ -10,7 +10,7 @@ import { FILTER_OPTIONS } from "@/constants/filterOptions";
 
 interface DifficultySelectProps {
   value?: string;
-  onValueChange?: (value: 'easy' | 'normal' | 'hard') => void;
+  onValueChange?: (value: 'EASY' | 'NORMAL' | 'HARD') => void;
   placeholder?: string;
 }
 

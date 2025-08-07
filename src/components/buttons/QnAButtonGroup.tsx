@@ -1,14 +1,56 @@
 import { Button } from "@/components/ui/button";
+import { AnswerStatus, type Interaction, type PlayAction } from "@/types/game/game";
+import { sendReply } from "@/websocket/sender";
 
-const QnAButtonGroup = () => {
-  // 여기에 zustand 요청 함수가 전달됩니다.
+interface QnAButtonGroupProps {
+  question: Interaction;
+}
 
-  // 나중에, Button Label과 그에 맞는 실행 함수가 같이 묶입니다.
-  const buttonLabel: string[] = ["예", "아니오", "상관없음"];
+const QnAButtonGroup = ({ question }: QnAButtonGroupProps) => {
+  const roomId = 0;
+
+  const buttons: PlayAction[] = [
+    {
+      buttonLabel: "예",
+      onClick: () => {
+        if (question.status === AnswerStatus.PENDING)
+          sendReply(
+            roomId,
+            question.id,
+            question.content,
+            AnswerStatus.CORRECT
+          );
+      },
+    },
+    {
+      buttonLabel: "아니오",
+      onClick: () => {
+        if (question.status === AnswerStatus.PENDING)
+          sendReply(
+            roomId,
+            question.id,
+            question.content,
+            AnswerStatus.INCORRECT
+          );
+      },
+    },
+    {
+      buttonLabel: "상관없음",
+      onClick: () => {
+        if (question.status === AnswerStatus.PENDING)
+          sendReply(
+            roomId,
+            question.id,
+            question.content,
+            AnswerStatus.IRRELEVANT
+          );
+      },
+    },
+  ];
 
   return (
     <div className="flex w-full rounded-md shadow-sm" role="group">
-      {buttonLabel.map((label, index) => (
+      {buttons.map((keys, index) => (
         <Button
           key={index}
           className="
@@ -17,9 +59,9 @@ const QnAButtonGroup = () => {
           last:rounded-l-none
           not-first:border-l-0
           not-first:not-last:rounded-none"
-          // onClick={() => onClick(label)}
+          onClick={keys.onClick}
         >
-          {label}
+          {keys.buttonLabel}
         </Button>
       ))}
     </div>

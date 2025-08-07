@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Users } from "lucide-react";
-import type { RoomSummary } from "@/types/roomSummary";
+import type { RoomSummary } from "@/types/room/roomSummary";
 
 interface RoomCardProps {
   room: RoomSummary;
@@ -18,23 +18,23 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onClick }) => {
   // [대기중] 상태만 클릭하도록 제어
   const handleClick = () => {
     if (room.gameState === "waiting") {
-      onClick(room.id);
+      onClick(room.roomId);
     }
   };
 
   // 난이도 구분
   const difficultyConfig = {
-    easy: {
+    EASY: {
       icon: "🌱",
       color: "bg-green-100 text-green-800",
       label: "🌱 쉬움",
     },
-    normal: {
+    NORMAL: {
       icon: "⚡",
       color: "bg-yellow-100 text-yellow-800",
       label: "⚡ 보통",
     },
-    hard: {
+    HARD: {
       icon: "🔥",
       color: "bg-orange-100 text-orange-800",
       label: "🔥 어려움",
@@ -63,7 +63,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onClick }) => {
       <CardHeader>
         {/* 방 번호 */}
         <CardDescription className="flex flex-wrap gap-1 text-xs text-muted-foreground right-2">
-          사건번호 #{room.id}
+          사건번호 #{room.roomId}
           {/* 방 상태 : 대기 중, 게임 중 */}
           {/* 이후 뱃지 -> 테두리 색상으로 변경 */}
           <Badge
@@ -94,7 +94,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onClick }) => {
           </Badge>
 
           <Badge variant="secondary">
-            {room.problemType === "existing" ? "기존 사건" : "새로운 사건"}
+            {room.problemType === "ORIGINAL" ? "기존 사건" : "새로운 사건"}
           </Badge>
         </div>
       </CardHeader>

@@ -4,9 +4,9 @@ export type RoomSummary = {
   currentPlayers: number;
   maxPlayers: number;
   gameState: "waiting" | "in_game";
-  problemType: "existing" | "custom";
+  problemType: 'ORIGINAL' | 'CUSTOM' | 'AI';
   genres: string[]; // 1~3개
-  difficulty: "easy" | "normal" | "hard";
+  difficulty: 'EASY' | 'NORMAL' | 'HARD';
   timeLimit: number;
   hostName: string;
   

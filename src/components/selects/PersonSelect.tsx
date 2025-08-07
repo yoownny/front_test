@@ -10,6 +10,7 @@ interface PersonSelectProps {
   value?: string;
   onValueChange?: (value: string) => void;
   placeholder?: string;
+  readOnly?: boolean;
 }
 
 // 방 만들기 - 최대 인원 선택
@@ -17,6 +18,7 @@ const PersonSelect = ({
   value,
   onValueChange,
   placeholder = "최대 인원",
+  readOnly = false,
 }: PersonSelectProps) => {
   const personOptions = [
     { value: "2", label: "2명" },
@@ -27,17 +29,25 @@ const PersonSelect = ({
   ];
   return (
     <>
-      <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-[150px]">
+      <Select 
+        value={value} 
+        onValueChange={readOnly ? undefined : onValueChange}
+        disabled={readOnly}
+      >
+        <SelectTrigger 
+          className={`w-[150px] ${readOnly ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : ''}`}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
-          {personOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
+        {!readOnly && (
+          <SelectContent>
+            {personOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        )}
       </Select>
     </>
   );

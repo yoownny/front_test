@@ -16,9 +16,6 @@ const LoginCard = () => {
         <CardDescription>게임을 시작하려면 로그인하세요.</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center items-center">
-        {/* <Button variant="outline" className="w-full">
-          카카오톡 로그인
-        </Button> */}
         <GoogleLoginButton />
       </CardContent>
     </Card>

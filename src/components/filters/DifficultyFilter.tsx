@@ -24,7 +24,7 @@ const DifficultyFilter = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCheckboxChange = (
-    difficulty: "easy" | "normal" | "hard",
+    difficulty: 'EASY' | 'NORMAL' | 'HARD',
     checked: boolean
   ) => {
     if (checked) {

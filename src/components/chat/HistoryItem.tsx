@@ -1,5 +1,5 @@
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import type { Interaction } from "@/types/game";
+import type { Interaction } from "@/types/game/game";
 import {
   MessageCircleQuestionMark,
   CircleCheck,
@@ -8,25 +8,20 @@ import {
   MessageCircleWarning,
   Star,
   OctagonX,
-  MessageCircleOff,
 } from "lucide-react";
-import type { JSX } from "react";
 
 interface HistoryItemProps {
   History: Interaction;
 }
-type StyleMap = {
-  icon: JSX.Element;
-  className: string;
-};
 
 // 질문에 따른 스타일이 별도로 적용됩니다. 각 질문의 타입(질문, 답변),
 // 응답 종류(예, 아니오, 응답 없음, 상관 없음, 대기 중)에 따라 결정됩니다.
-const messageStyle = (msg: Interaction): StyleMap => {
+const messageStyle = (msg: Interaction) => {
   const isQuestion = msg.type === "question";
 
-  switch (msg.reply) {
-    case "yes":
+  switch (msg.status) {
+
+    case "CORRECT":
       return {
         icon: isQuestion ? (
           <CircleCheck className="stroke-green-600" />
@@ -37,7 +32,8 @@ const messageStyle = (msg: Interaction): StyleMap => {
           ? "bg-green-50 border-green-300"
           : "bg-yellow-50 border-yellow-300",
       };
-    case "no":
+
+    case "INCORRECT":
       return {
         icon: isQuestion ? (
           <CircleX className="stroke-red-600" />
@@ -46,17 +42,14 @@ const messageStyle = (msg: Interaction): StyleMap => {
         ),
         className: "bg-red-50 border-red-300",
       };
-    case "neutral":
+
+    case "IRRELEVANT":
       return {
         icon: <CircleMinus className="stroke-gray-500" />,
         className: "bg-gray-50 border-gray-300",
       };
-    case "no_response":
-      return {
-        icon: <MessageCircleOff className="stroke-gray-400" />,
-        className: "bg-slate-50 border-slate-300",
-      };
-    case null:
+
+    case "PENDING":
       return {
         icon: isQuestion ? (
           <MessageCircleQuestionMark className="stroke-blue-500" />
@@ -67,10 +60,11 @@ const messageStyle = (msg: Interaction): StyleMap => {
           ? "bg-blue-50 border-blue-300"
           : "bg-orange-50 border-orange-300",
       };
+      
     default:
       return {
         icon: <MessageCircleQuestionMark className="stroke-gray-400" />,
-        className: "bg-muted border",
+        className: "bg-slate-50 border-slate-300",
       };
   }
 };

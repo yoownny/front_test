@@ -1,88 +1,127 @@
 // 게임방의 룸 상태 관리
-import type { Interaction } from "@/types/game";
-import type { ProblemBrief } from "@/types/problem";
-import type { User } from "@/types/user";
+import { AnswerStatus, type Interaction } from "@/types/game/game";
+import type { GamePlayer } from "@/types/user";
+import type { GameStoreType } from "./types";
 import { create } from "zustand";
 
-interface GameStoreType {
-  problemInfo: ProblemBrief | null;
-  currentPlayers: User[];
-  isHost: boolean;
-  currentTurnPlayerId: number | null;
-  currentQuestion: Interaction | null;
-  gameHistory: Interaction[];
-  currentTimer: number;
-  nextInteractionId: number;
-
-  gameStart: (problem: ProblemBrief, playerList: User[], userId: number) => void;
-  addInteraction: (type: "question" | "answer", player: string, content: string,) => void;
-  putReply: (targetId: number, replyContent: string) => void;
-  turnOver: () => void;
-  syncTimer: (remainingTime: number) => void;
-  gameOver: () => void;
-}
-
-const useGameStore = create<GameStoreType>()((set) => ({
+const useGameStore = create<GameStoreType>()((set, get) => ({
   // Initial State
-  problemInfo: null,
-  currentPlayers: [],
-  isHost: false,
-  currentTurnPlayerId: null,
+  // 게임 정보
+  roomId: -1,
+  players: [],
+  remainingQuestions: 0,
+  totalQuestions: 0,
+
+  // 질문 정보
   currentQuestion: null,
   gameHistory: [],
+
+  // 게임
   currentTimer: 0,
-  nextInteractionId: 0,
+
+  // State Logic 별도
+  nextInteractionId: 1,
 
   // 게임 시작 State Logic
-  gameStart: (problem: ProblemBrief, playerList: User[], userId: number) => set(() => ({
-    problemInfo: problem,
-    currentPlayers: playerList,
-    isHost: playerList.find((player) => player.id === userId)?.isHost ?? false,
-  })),
+  // gameStart: (
+  //   roomId: number,
+  //   playerList: GamePlayer[],
+  //   remainingQuestions: number,
+  //   totalQuestions: number,
+  //   targetUserId: number,
+  //   targetUsername: string
+  // ) =>
+  //   set(() => ({
+  //     roomId: roomId,
+  //     players: playerList,
+  //     remainingQuestions,
+  //     totalQuestions,
+  //     currentQuestionerId: targetUserId,
+  //     currentQuestionerName: targetUsername,
+  //   })),
+  gameStart: (
+    roomId: number,
+    playerList: GamePlayer[],
+    remainingQuestions: number,
+    totalQuestions: number
+  ) =>
+    set(() => ({
+      roomId: roomId,
+      players: playerList,
+      remainingQuestions,
+      totalQuestions,
+      currentQuestion: null,
+      gameHistory: [],
+      currentTimer: 0,
+      nextInteractionId: 1,
+    })),
 
   // 참가자 질문 및 답변 State Logic
-  addInteraction: (type: "question" | "answer", player: string, content: string) => set((state) => {
-    const newInteraction: Interaction = {
-      id: state.nextInteractionId,
-      type,
-      player,
-      content,
-      status: "PENDING",
-    };
+  addInteraction: (
+    type: "question" | "answer",
+    playerId: number,
+    content: string
+  ) =>
+    set((state) => {
+      const newInteraction: Interaction = {
+        id: playerId,
+        username:
+          state.players.find((player) => player.id == playerId)?.name ??
+          "Unknown",
+        type,
+        content,
+        status: AnswerStatus.PENDING,
+      };
 
-    return {
-      gameHistory: [...state.gameHistory, newInteraction],
-      currentQuestion: type === "question" ? newInteraction : state.currentQuestion,
-      nextInteractionId: state.nextInteractionId + 1,
-    };
-  }),
+      return {
+        currentQuestion: newInteraction,
+      };
+    }),
 
   // 방장 (질문 및 답변) 응답 State Logic
-  putReply: (targetId: number, replyContent: string) => set((state) => ({
-    gameHistory: state.gameHistory.map((Interaction) =>
-      Interaction.id === targetId ? { ...Interaction, reply: replyContent } : Interaction
-    )
-  })),
+  addHistory: (
+    type: "question" | "answer",
+    playerId: number,
+    content: string,
+    replyContent: AnswerStatus
+  ) =>
+    set((state) => {
+      const newInteraction: Interaction = {
+        id: playerId,
+        username:
+          state.players.find((player) => player.id == playerId)?.name ??
+          "Unknown",
+        type,
+        content,
+        status: replyContent,
+      };
+
+      return {
+        gameHistory: [...state.gameHistory, newInteraction],
+        nextInteractionId: state.nextInteractionId + 1,
+      };
+    }),
 
   // 턴 넘기기 State Logic
-  turnOver: () => set(() => ({})),
+  // turnOver: (targetUserId: number) =>
+  //   set(() => ({
+  //     currentQuestionerId: targetUserId,
+  //   })),
 
   // Server와 Client Timer Sync 맞추기
-  syncTimer: (remainingTime: number) => set(() => ({
-    currentTimer: remainingTime,
-  })),
+  syncTimer: (remainingTime: number) => {
+    set({ currentTimer: remainingTime });
+  },
 
   // 게임 종료 State Logic
-  gameOver: () => set(() => ({
-    problemInfo: null,
-    currentPlayers: [],
-    currentTurnPlayerId: null,
-    currentQuestion: null,
-    gameHistory: [],
-    currentTimer: 0,
-    nextInteractionId: 0,
-  }))
+  gameOver: () =>
+    set(() => ({
+      players: [],
+      currentQuestion: null,
+      gameHistory: [],
+      currentTimer: 0,
+      nextInteractionId: 0,
+    })),
 }));
-
 
 export default useGameStore;

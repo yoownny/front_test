@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, Loader2, AlertCircle, User } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 interface NicknameCardProps {
   onRegister: (nickname: string) => Promise<void>;
@@ -36,6 +37,8 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
   });
   const [validationError, setValidationError] = useState('');
 
+  const navigate = useNavigate();
+
   // 닉네임 변경 시 상태 초기화
   useEffect(() => {
     setCheckResult({ checked: false, available: false, message: '' });
@@ -60,12 +63,12 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
     return { isValid: true, message: '' };
   };
 
-  // 닉네임 입력 처리
+  // 닉네임 입력
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setNickname(value);
     
-    // 실시간 유효성 검사
+    // 유효성 검사
     if (value.length > 0) {
       const validation = validateNickname(value);
       setValidationError(validation.isValid ? '' : validation.message);
@@ -74,7 +77,8 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
     }
   };
 
-  // 닉네임 중복 검사
+  // 닉네임 중복 확인
+  // API 요청 필요. /api/auth/check-nickname (GET)
   const handleCheckNickname = async () => {
     const validation = validateNickname(nickname);
     if (!validation.isValid) {
@@ -93,7 +97,7 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
       });
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '닉네임 중복 검사에 실패했습니다.';
+      const errorMessage = error instanceof Error ? error.message : '닉네임 중복확인에 실패했습니다.';
       setCheckResult({
         checked: true,
         available: false,
@@ -105,31 +109,22 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
   };
 
   // 회원가입 처리
+  // API 요청 필요. /api/auth/nickname (POST)
   const handleRegister = async () => {
     if (!checkResult.checked || !checkResult.available) {
       setCheckResult({
         checked: true,
         available: false,
-        message: '닉네임 중복 검사를 완료해주세요.'
+        message: '닉네임 중복확인을 완료해주세요.'
       });
       return;
     }
 
     try {
       await onRegister(nickname);
+      navigate('/lobby');
     } catch (error) {
       console.error('회원가입 실패:', error);
-    }
-  };
-
-  // Enter 키 처리
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (!checkResult.checked || !checkResult.available) {
-        handleCheckNickname();
-      } else {
-        handleRegister();
-      }
     }
   };
 
@@ -137,8 +132,7 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        {/* 아이콘 */}
+      <CardHeader className="text-center">\
         <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
           <User className="w-10 h-10 text-white" />
         </div>
@@ -150,7 +144,6 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* 닉네임 입력 */}
         <div className="space-y-2">
           <Label htmlFor="nickname">닉네임</Label>
           <div className="flex space-x-2">
@@ -159,7 +152,6 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
                 id="nickname"
                 value={nickname}
                 onChange={handleNicknameChange}
-                onKeyPress={handleKeyPress}
                 placeholder="2-8글자 (한글, 영문, 숫자, _, -)"
                 maxLength={8}
                 disabled={isChecking || isRegistering}
@@ -197,7 +189,7 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
             </div>
           )}
 
-          {/* 중복검사 결과 */}
+          {/* 중복확인 결과 */}
           {checkResult.checked && !validationError && (
             <div className={`flex items-center text-sm ${
               checkResult.available ? 'text-green-600' : 'text-red-600'
@@ -212,7 +204,6 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
           )}
         </div>
 
-        {/* 전역 에러 메시지 */}
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -220,7 +211,6 @@ const NicknameCard: React.FC<NicknameCardProps> = ({
           </Alert>
         )}
 
-        {/* 버튼들 */}
         <div className="space-y-3">
           <Button
             onClick={handleRegister}

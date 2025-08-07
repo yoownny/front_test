@@ -1,14 +1,46 @@
 import { Button } from "@/components/ui/button";
+import { AnswerStatus, type Interaction, type PlayAction } from "@/types/game/game";
+import { sendJudgement } from "@/websocket/sender";
 
-const AnswerAssessButtonGroup = () => {
-  // 여기에 zustand 요청 함수가 전달됩니다.
+interface AnswerAssessButtonGroupProps {
+  question: Interaction;
+}
 
-  // 나중에, Button Label과 그에 맞는 실행 함수가 같이 묶입니다.
-  const buttonLabel: string[] = ["맞습니다", "아닙니다"];
+const AnswerAssessButtonGroup = ({
+  question,
+}: AnswerAssessButtonGroupProps) => {
+  const roomId = 0;
+
+  const buttons: PlayAction[] = [
+    {
+      buttonLabel: "맞습니다",
+      onClick: () => {
+        if (question.status === AnswerStatus.PENDING)
+          sendJudgement(
+            roomId,
+            question.id,
+            question.content,
+            AnswerStatus.CORRECT
+          );
+      },
+    },
+    {
+      buttonLabel: "아닙니다",
+      onClick: () => {
+        if (question.status === AnswerStatus.PENDING)
+          sendJudgement(
+            roomId,
+            question.id,
+            question.content,
+            AnswerStatus.INCORRECT
+          );
+      },
+    },
+  ];
 
   return (
     <div className="flex w-full rounded-md shadow-sm" role="group">
-      {buttonLabel.map((label, index) => (
+      {buttons.map((keys, index) => (
         <Button
           key={index}
           className="
@@ -17,9 +49,9 @@ const AnswerAssessButtonGroup = () => {
           last:rounded-l-none
           not-first:border-l-0
           not-first:not-last:rounded-none"
-          // onClick={() => onClick(label)}
+          onClick={() => onclick}
         >
-          {label}
+          {keys.buttonLabel}
         </Button>
       ))}
     </div>

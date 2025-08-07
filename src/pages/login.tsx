@@ -1,4 +1,4 @@
-import AuthTemplate from "@/templates/AuthTemplate";
+import AuthTemplate from "@/layouts/AuthTemplate";
 
 const LoginPage = () => {
   return <div className="max-w-[1440px] mx-auto p-10">

@@ -2,9 +2,9 @@ import type { FilterOptions } from '@/types/filter';
 
 export const FILTER_OPTIONS: FilterOptions = {
   difficulties: [
-    { value: 'easy', label: '쉬움', icon: '🌱' },
-    { value: 'normal', label: '보통', icon: '⚡' },
-    { value: 'hard', label: '어려움', icon: '🔥' }
+    { value: 'EASY', label: '쉬움', icon: '🌱' },
+    { value: 'NORMAL', label: '보통', icon: '⚡' },
+    { value: 'HARD', label: '어려움', icon: '🔥' }
   ],
   genres: [
     { value: '공포', label: '공포' },
@@ -22,7 +22,7 @@ export const FILTER_OPTIONS: FilterOptions = {
     { value: '동물', label: '동물' }
   ],
   problemTypes: [
-    { value: 'existing', label: '기존 사건' },
-    { value: 'custom', label: '새로운 사건' }
+    { value: 'ORIGINAL', label: '기존 사건' },
+    { value: 'CUSTOM', label: '새로운 사건' }
   ]
 };

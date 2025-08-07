@@ -1,11 +1,10 @@
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
+  // DialogTrigger,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "../ui/badge";
 
@@ -22,13 +21,16 @@ interface ResultProps {
   result: Result;
 }
 
-const ResultDialog = ({ result }: ResultProps) => {
+const ResultDialog = ({ open, onOpenChange, result }: ResultProps
+  & { open: boolean, onOpenChange: (open: boolean) => void }
+) => {
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {/* 추후 이벤트리스너로 처리 예정 */}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* <DialogTrigger asChild>
+        추후 이벤트리스너로 처리 예정
         <Button>게임 종료</Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
 
       <DialogContent className="w-full max-w-lg">
         <DialogHeader>
@@ -49,7 +51,6 @@ const ResultDialog = ({ result }: ResultProps) => {
           </div>
         </div>
 
-        {/* 문제 내용 */}
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">사건 내용</h3>
           <div className="bg-muted rounded-md p-4 text-sm">
@@ -57,7 +58,6 @@ const ResultDialog = ({ result }: ResultProps) => {
           </div>
         </div>
 
-        {/* 문제 내용 */}
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">사건의 전말</h3>
           <div className="bg-muted rounded-md p-4 text-sm">{result.answer}</div>

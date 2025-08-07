@@ -2,18 +2,17 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import useRoomStore from "@/stores/roomStore";
-import { leaveRoomAPI } from "@/lib/roomAPI"
+import useProblemStore from "@/stores/problemStore";
 
 const GameRoomHeader = () => {
-  const roomId = useRoomStore(state => state.roomId);
-  const roomTitle = useRoomStore(state => state.title);
+  const roomTitle = useProblemStore(state => state.title);
   const leaveRoom = useRoomStore(state => state.resetRoom);
   const navigate = useNavigate();
 
   const onLeaveRoom = async () => {
     try {
       // 추후 방 나가기 UI 개선 코드 작성 예정
-      await leaveRoomAPI(roomId);
+      // await leaveRoomAPI(roomId);
       leaveRoom();
       navigate("/lobby");
     } catch {
@@ -31,6 +30,7 @@ const GameRoomHeader = () => {
         role="button"
         size={20}
         onClick={onLeaveRoom}
+        className="cursor-pointer"
       />
     </Card>
   );

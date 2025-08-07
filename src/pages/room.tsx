@@ -1,71 +1,66 @@
-import WaitingTemplate from "@/templates/WaitingTemplate";
-import GameHostTemplate from "@/templates/GameHostTemplate";
-import GamePlayerTemplate from "@/templates/GamePlayerTemplate";
+import WaitingTemplate from "@/layouts/WaitingTemplate";
+import GameHostTemplate from "@/layouts/GameHostTemplate";
+import GamePlayerTemplate from "@/layouts/GamePlayerTemplate";
 import { useEffect, type ReactNode } from "react";
 import type { User } from "@/types/user";
-import type { RoomDetailResponse } from "@/types/roomDetail";
 import { useParams } from "react-router-dom";
-import { closeConnect, openConnect } from "@/utils/webSocketConnection";
+import useRoomStore from "@/stores/roomStore";
+import { joinRoom, leaveRoom } from "@/websocket/subscription";
+import { mockDataDefaultProblem, mockDataPlayerList } from "@/mockdata";
+import useProblemStore from "@/stores/problemStore";
+import useWebsocketStore from "@/stores/useWebSocketStore";
 
 const RoomPage = () => {
-  // 현재 Player 또는 Room State에 기반하여 렌더링되는 Template가 달라집니다.
-  // 아래는 임시로 State를 정의하였습니다.
-  const mockPlayers: RoomDetailResponse["participants"] = [
-    // 1. 방장
-    {
-      id: 1,
-      name: "Craftor",
-      isHost: true,
-      isReady: false,
-    },
+  // const players = useRoomStore((state) => state.players);
+  const gameState = useRoomStore((state) => state.gameState);
+  const maxPlayers = useRoomStore((state) => state.maxPlayers);
+  const numPlayers = useRoomStore((state) => state.numPlayers);
+  const hostId = useRoomStore((state) => state.hostId);
+  const setRoom = useRoomStore.getState().setRoom;
+  const setProblem = useProblemStore.getState().joinAsHost;
+  const players = mockDataPlayerList;
 
-    // 2. 참가자 (준비 X)
-    {
-      id: 2,
-      name: "Baek_Kim_Chi",
-      isHost: false,
-      isReady: false,
-    },
+  // const params = useParams();
+  // const roomId = Number(params.id);
+  const roomId = 0;
 
-    // 3. 참가자 (준비 O)
-    {
-      id: 3,
-      name: "연화설비",
-      isHost: false,
-      isReady: true,
-    },
-  ];
-
-  const gameState: string = "in_game";
-  const currentPlayer: User = mockPlayers[0];
-  const isQuestion: boolean = true;
-
-  const params = useParams();
+  const currentPlayer: User = players[2];
 
   useEffect(() => {
-    openConnect(params.id);
-    return () => closeConnect();
-  });
+    useWebsocketStore.getState().setCurrentRoomId(roomId);
+    joinRoom(roomId);
+    setRoom({
+      roomId: 0,
+      gameState: "IN_GAME",
+      maxPlayers: 6,
+      numPlayers: 3,
+      hostId: 1,
+      participants: mockDataPlayerList.map((player) => ({
+        id: player.id,
+        name: player.name,
+        isHost: player.isHost,
+        status: "READY",
+      })),
+    });
+    setProblem({
+      ...mockDataDefaultProblem,
+    });
+    return () => {
+      leaveRoom(roomId);
+      useWebsocketStore.getState().setCurrentRoomId(null);
+    };
+  }, []);
 
   const templateStatus = (): ReactNode => {
     switch (gameState) {
-      case "in_game":
+      case "IN_GAME":
         return currentPlayer.isHost ? (
-          <GameHostTemplate
-            players={mockPlayers}
-            currentPlayer={currentPlayer}
-            isQuestion={isQuestion}
-          />
+          <GameHostTemplate />
         ) : (
           <GamePlayerTemplate />
         );
       default:
-        return (
-          <WaitingTemplate
-            players={mockPlayers}
-            currentPlayer={currentPlayer}
-          />
-        );
+        return <WaitingTemplate players={players} />;
     }
   };
 

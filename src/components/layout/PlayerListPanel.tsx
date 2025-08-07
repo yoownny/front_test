@@ -1,22 +1,22 @@
 import { Card } from "@/components/ui/card";
 import PlayerInfo from "../cards/PlayerInfo";
 import type { User } from "@/types/user";
+import useRoomStore from "@/stores/roomStore";
 
-interface PlayerListProps {
-    players: User[];
-}
+const PlayerListPanel = () => {
+  const players = useRoomStore((state) => state.players);
+  const maxPositions = 6;
 
-const PlayerListPanel = ({ players }: PlayerListProps) => {
-
-  const maxPlayers: number = 6;
   const paddedList: User[] = [
     ...players,
-    ...Array(maxPlayers - players.length).fill(null).map((_, index) => ({
-      id: -index - 1, // 음수로 임시 고유 id
-      name: "",
-      isHost: false,
-      isReady: false,
-    })),
+    ...Array(maxPositions - players.length)
+      .fill(null)
+      .map((_, index) => ({
+        id: -index - 1, // 음수로 임시 고유 id
+        name: "",
+        isHost: false,
+        isReady: true,
+      })),
   ];
 
   return (

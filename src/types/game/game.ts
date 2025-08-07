@@ -4,10 +4,10 @@
 // 사용자의 질문 및 응답에 대한 구조입니다. type으로 분류됩니다.
 export interface Interaction {
   id: number;
+  username: string;
   type: "question" | "answer";
-  player: string;
   content: string;
-  status: string;
+  status: AnswerStatus;
 };
 
 export interface Reply {
@@ -16,3 +16,22 @@ export interface Reply {
   player_id: number;
   button_value: string;
 };
+
+export interface WebsocketResponse<T = any> {
+  eventType: string;
+  payload: T;
+}
+
+export const AnswerStatus = {
+  PENDING: "PENDING",
+  CORRECT: "CORRECT",
+  INCORRECT: "INCORRECT",
+  IRRELEVANT: "IRRELEVANT",
+} as const;
+
+export type AnswerStatus = typeof AnswerStatus[keyof typeof AnswerStatus];
+
+export interface PlayAction {
+  buttonLabel: string;
+  onClick: () => void;
+}

@@ -4,7 +4,6 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-  // Shadcn 컴파일러 설정
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

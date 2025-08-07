@@ -1,16 +1,19 @@
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import type { Log } from "@/types/user";
+import useUserStore from "@/stores/userStore";
+import type { ChatLog } from "@/types/chat";
 
 interface ChatItemProps {
-  log: Log;
+  log: ChatLog;
 }
 
 const ChatItem = ({ log }: ChatItemProps) => {
+  const myName = useUserStore(state => state.userName);
+
   function msgAlignType(userType: string): string {
     switch (userType) {
-      case "System":
+      case "system":
         return "mx-auto";
-      case "Craftor":
+      case myName:
         return "ml-auto";
       default:
         return "mr-auto";

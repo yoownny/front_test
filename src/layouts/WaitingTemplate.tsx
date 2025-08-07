@@ -6,12 +6,12 @@ import HostButtonSet from "@/components/buttons/HostButtonSet";
 import PlayerButtonSet from "@/components/buttons/PlayerButtonSet";
 import type { User } from "@/types/user";
 
-interface WaitingTemplatelProps {
+interface WaitingTemplateProps {
   players: User[];
-  currentPlayer: User;
 }
 
-function WaitingTemplate({ players, currentPlayer }: WaitingTemplatelProps) {
+function WaitingTemplate({ players }: WaitingTemplateProps) {
+  const currentPlayer: User = players[0];
   return (
     <div className="grid gap-4">
       {/* 상단 고정 헤더 + 하부 (고정 크기 + 상대 크기) */}
@@ -30,14 +30,10 @@ function WaitingTemplate({ players, currentPlayer }: WaitingTemplatelProps) {
           {/* 참가자 + 버튼 (3:1 비율) */}
           <div className="grid grid-cols-[3fr_2fr] gap-4">
             {/* 참가자 패널 */}
-            <PlayerListPanel players={players}/>
+            <PlayerListPanel />
 
             {/* 버튼 영역 */}
-            {currentPlayer.isHost ? (
-              <HostButtonSet />
-            ) : (
-              <PlayerButtonSet isReady={currentPlayer.isReady} />
-            )}
+            {currentPlayer.isHost ? <HostButtonSet /> : <PlayerButtonSet />}
           </div>
         </div>
       </div>

@@ -14,8 +14,9 @@ import PersonSelect from "../selects/PersonSelect";
 import TimeSelect from "../selects/TimeSelect";
 import ProblemDrawer from "../drawers/ProblemDrawer";
 
-import type { SelectedProblem } from "@/types/problem";
-import type { CreateRoomRequest } from "@/types/roomRequest";
+import type { SelectedProblem } from "@/types/problem/problem";
+import type { CreateRoomRequest } from "@/types/room/roomRequest";
+import { sendCreateRoom } from "@/websocket/sender";
 
 const CreateRoomDialog = () => {
   const [selectedProblem, setSelectedProblem] =
@@ -30,15 +31,13 @@ const CreateRoomDialog = () => {
     console.log("선택된 사건:", problem);
   };
 
-  // 방 생성 핸들러  
+  // 방 생성 핸들러
   const handleCreateRoom = () => {
-    // 입력 다 되었는지 검증
     if (!selectedProblem || !maxPlayers || !timeLimit) {
       alert("모든 정보를 입력해주세요.");
       return;
     }
 
-    // 방 생성 API 호출
     const roomData: CreateRoomRequest = {
       title: selectedProblem.title,
       maxPlayers: parseInt(maxPlayers),
@@ -53,12 +52,18 @@ const CreateRoomDialog = () => {
       // await createRoom(roomData);
 
       // 테스트용 alert
-      alert(`방 생성 완료!\n` + 
+      alert(
+        `방 생성 완료!\n` +
           `사건: ${selectedProblem.title}\n` +
           `인원: ${maxPlayers}명\n` +
-          `시간: ${timeLimit}분`);
+          `시간: ${timeLimit}분`
+      );
 
       handleCloseDialog();
+      sendCreateRoom(Number(maxPlayers), Number(timeLimit), {
+        problemId: String(selectedProblem.problemId),
+        problemType: selectedProblem.problemType,
+      });
     } catch (error) {
       console.error("사건 파일 생성 실패:", error);
       alert("사건 파일 생성에 실패했습니다.");
@@ -80,9 +85,9 @@ const CreateRoomDialog = () => {
 
   // 난이도 표기
   const difficultyConfig = {
-    easy: { icon: "🌱", label: "쉬움" },
-    normal: { icon: "⚡", label: "보통" },
-    hard: { icon: "🔥", label: "어려움" },
+    EASY: { icon: "🌱", label: "쉬움" },
+    NORMAL: { icon: "⚡", label: "보통" },
+    HARD: { icon: "🔥", label: "어려움" },
   };
 
   // 버튼 활성화 조건
@@ -95,7 +100,7 @@ const CreateRoomDialog = () => {
       </DialogTrigger>
 
       <DialogContent className="w-full max-w-lg">
-        <DialogHeader>
+        <DialogHeader className="text-center">
           <DialogTitle>파일 정보 입력</DialogTitle>
         </DialogHeader>
 
@@ -135,7 +140,7 @@ const CreateRoomDialog = () => {
                     {difficultyConfig[selectedProblem.difficulty].label}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
-                    {selectedProblem.problemType === "existing"
+                    {selectedProblem.problemType === "ORIGINAL"
                       ? "기존 사건"
                       : "새로운 사건"}
                   </Badge>
@@ -175,18 +180,21 @@ const CreateRoomDialog = () => {
           <Button variant="ghost" onClick={handleCloseDialog}>
             취소
           </Button>
-          <Button 
-              onClick={handleCreateRoom}
-              disabled={!isCreateButtonEnabled}
-              className={!isCreateButtonEnabled ? 'opacity-50 cursor-not-allowed' : ''}
-            >
-              사건 파일 생성
-              {!isCreateButtonEnabled && (
-                <span className="ml-1 text-xs">
-                  ({!selectedProblem ? '사건' : !maxPlayers ? '인원' : '시간'} 선택 필요)
-                </span>
-              )}
-            </Button>
+          <Button
+            onClick={handleCreateRoom}
+            disabled={!isCreateButtonEnabled}
+            className={
+              !isCreateButtonEnabled ? "opacity-50 cursor-not-allowed" : ""
+            }
+          >
+            사건 파일 생성
+            {!isCreateButtonEnabled && (
+              <span className="ml-1 text-xs">
+                ({!selectedProblem ? "사건" : !maxPlayers ? "인원" : "시간"}{" "}
+                선택 필요)
+              </span>
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
