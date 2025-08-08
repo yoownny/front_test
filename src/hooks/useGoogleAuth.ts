@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import axios from 'axios';
+import { login } from '@/services/api/auth/loginApi';
 import type { GoogleUserInfo, GoogleTokenResponse, GoogleTokenClient, LoginRequest } from '@/types/auth';
 
 export function useGoogleAuth() {
@@ -12,7 +12,7 @@ export function useGoogleAuth() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   /**
-   * Google 로그인 처리 - axios 사용!
+   * Google 로그인 처리 - 기본 apiClient 사용
    */
   async function handleGoogleLogin(): Promise<void> {
     if (isLoading) return;
@@ -68,59 +68,32 @@ export function useGoogleAuth() {
         tokenClient.requestAccessToken();
       });
 
-      // 3. 백엔드 로그인 - axios 직접 사용
+      // 3. 백엔드 로그인 - loginApi 사용
       const loginData: LoginRequest = {
         provider: "google",
         socialId: userInfo.id,
       };
 
-      console.log('=== axios 로그인 요청 ===');
-      console.log('요청 URL:', `${import.meta.env.VITE_API_BASE_URL}/auth/login`);
+      console.log('=== 백엔드 로그인 요청 ===');
       console.log('요청 데이터:', loginData);
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
-        loginData,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        }
-      );
+      const response = await login(loginData);
 
-      // 404는 신규 사용자
-      if (response.status === 404) {
-        console.log('신규 사용자 - 회원가입 페이지로 이동');
-        sessionStorage.setItem('tempGoogleId', userInfo.id);
-        navigate('/signup');
-        return;
-      }
+      console.log('✅ 로그인 성공:', response);
 
-      // 4. 토큰 저장 - axios에서는 headers 객체로 접근
-      let accessToken: string | null = response.headers.authorization;
-      
-      if (!accessToken) {
-        console.error('❌ 토큰을 찾을 수 없습니다!');
-        console.error('헤더 목록:', Object.keys(response.headers));
-        throw new Error('No access token received from server');
-      }
-      
-      console.log('✅ 최종 토큰:', accessToken);
+      // 4. 사용자 정보 및 accessToken 저장
+      setUser(response.user);
+      setAccessToken(response.accessToken);
 
-      // 5. 사용자 정보 저장
-      const userData = response.data.data || response.data;
-      console.log('✅ 사용자 데이터 저장:', userData);
-      setUser(userData);
-      setAccessToken(accessToken);
-
-      // 6. 성공 시 이동
+      // 5. 성공 시 로비로 이동
       console.log('✅ 로비로 이동');
       navigate('/lobby');
 
     } catch (error: any) {
       console.error('Google 로그인 오류:', error);
       
-      // axios 에러 처리
-      if (error.response?.status === 404) {
+      // 404는 신규 사용자
+      if (error.statusCode === 404) {
         console.log('신규 사용자 - 회원가입 페이지로 이동');
         sessionStorage.setItem('tempGoogleId', userInfo!.id);
         navigate('/signup');
@@ -135,6 +108,8 @@ export function useGoogleAuth() {
           errorMessage = '로그인이 취소되었습니다.';
         } else if (error.message.includes('No access token received')) {
           errorMessage = '서버에서 인증 토큰을 받지 못했습니다. 잠시 후 다시 시도해주세요.';
+        } else {
+          errorMessage = error.message;
         }
       }
       

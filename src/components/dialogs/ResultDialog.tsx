@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "../ui/badge";
+import { apiClient } from "@/services/api/apiClient";
 
 interface Result {
   winner: string;
@@ -15,16 +16,48 @@ interface Result {
   content: string;
   answer: string;
   isCorrect: boolean;
+  problemId: string;
 }
 
 interface ResultProps {
   result: Result;
+  totalPlayers: number;
 }
 
-const ResultDialog = ({ open, onOpenChange, result }: ResultProps
-  & { open: boolean, onOpenChange: (open: boolean) => void }
-) => {
+const evaluateProblem = async ({
+  problemId, // string (숫자 or uuid)
+  totalPlayers,
+}: {
+  problemId: string;
+  totalPlayers: number;
+}) => {
+  const isMemory = problemId.includes("-");
 
+  const body = isMemory
+    ? {
+        memoryProblemId: problemId,
+        isLike: true,
+        totalPlayers,
+      }
+    : {
+        problemId: Number(problemId),
+        isLike: true,
+      };
+
+  try {
+    await apiClient.post("/problems/evaluate", body);
+    alert("평가 완료! 감사합니다.");
+  } catch (err) {
+    console.error("문제 평가 실패:", err);
+    alert("평가에 실패했습니다.");
+  }
+};
+
+const ResultDialog = ({
+  open,
+  onOpenChange,
+  result,
+}: ResultProps & { open: boolean; onOpenChange: (open: boolean) => void }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* <DialogTrigger asChild>
@@ -43,8 +76,12 @@ const ResultDialog = ({ open, onOpenChange, result }: ResultProps
 
         <div className="flex flex-col items-center space-y-4">
           <div className="justify-between">
-            <Badge className="bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-md">소요시간: {result.time}분</Badge>
-            <Badge className="bg-gradient-to-r from-green-400 to-green-500 text-white shadow-md">시도 턴 수: {result.turn}턴</Badge>
+            <Badge className="bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-md">
+              소요시간: {result.time}분
+            </Badge>
+            <Badge className="bg-gradient-to-r from-green-400 to-green-500 text-white shadow-md">
+              시도 턴 수: {result.turn}턴
+            </Badge>
             <Badge className="bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-md">
               정답자: {result.isCorrect === true ? result.winner : "없음"}
             </Badge>
@@ -63,10 +100,16 @@ const ResultDialog = ({ open, onOpenChange, result }: ResultProps
           <div className="bg-muted rounded-md p-4 text-sm">{result.answer}</div>
         </div>
 
-        <div className="flex justify-center gap-2 mt-4">
-          <Button>👍 이 문제 좋아요</Button>
-          <Button>파일로 돌아가기</Button>
-        </div>
+        <Button
+          onClick={() =>
+            evaluateProblem({
+              problemId: result.problemId,
+              totalPlayers: 2,
+            })
+          }
+        >
+          👍 이 문제 좋아요
+        </Button>
       </DialogContent>
     </Dialog>
   );

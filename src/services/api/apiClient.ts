@@ -22,10 +22,9 @@ class ApiClient {
    */
   constructor(baseURL = import.meta.env.VITE_API_BASE_URL) {
     const finalBaseURL = baseURL || "http://localhost:8080";
-    console.log("API Client initialized with baseURL:", `${finalBaseURL}/api`);
 
     this.instance = axios.create({
-      baseURL: `${finalBaseURL}/api`,
+      baseURL: `${finalBaseURL}`,
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
@@ -119,6 +118,8 @@ class ApiClient {
     const response = await this.instance.delete<ApiSuccessResponse<T>>(url);
     return response.data.data;
   }
+
+  
 }
 
 /**
