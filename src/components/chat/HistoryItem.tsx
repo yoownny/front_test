@@ -1,5 +1,5 @@
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import type { Interaction } from "@/types/game/game";
+import { AnswerStatus, type Interaction } from "@/types/game/game";
 import {
   MessageCircleQuestionMark,
   CircleCheck,
@@ -17,11 +17,11 @@ interface HistoryItemProps {
 // 질문에 따른 스타일이 별도로 적용됩니다. 각 질문의 타입(질문, 답변),
 // 응답 종류(예, 아니오, 응답 없음, 상관 없음, 대기 중)에 따라 결정됩니다.
 const messageStyle = (msg: Interaction) => {
-  const isQuestion = msg.type === "question";
+  const isQuestion = msg.type === "QUESTION";
 
   switch (msg.status) {
 
-    case "CORRECT":
+    case AnswerStatus.CORRECT:
       return {
         icon: isQuestion ? (
           <CircleCheck className="stroke-green-600" />
@@ -33,7 +33,7 @@ const messageStyle = (msg: Interaction) => {
           : "bg-yellow-50 border-yellow-300",
       };
 
-    case "INCORRECT":
+    case AnswerStatus.INCORRECT:
       return {
         icon: isQuestion ? (
           <CircleX className="stroke-red-600" />
@@ -43,13 +43,13 @@ const messageStyle = (msg: Interaction) => {
         className: "bg-red-50 border-red-300",
       };
 
-    case "IRRELEVANT":
+    case AnswerStatus.IRRELEVANT:
       return {
         icon: <CircleMinus className="stroke-gray-500" />,
         className: "bg-gray-50 border-gray-300",
       };
 
-    case "PENDING":
+    case AnswerStatus.PENDING:
       return {
         icon: isQuestion ? (
           <MessageCircleQuestionMark className="stroke-blue-500" />

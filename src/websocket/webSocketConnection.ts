@@ -2,7 +2,6 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import useWebsocket from "@/stores/useWebSocketStore";
 import { joinMyMsg, joinRoom } from "./subscription";
-import { testuser1, testuser2, testuser3 } from "@/mockdata";
 
 // 시스템 메시지를 출력하는 유틸 함수
 function addSystemMessage(message: string, type: "system" | "user" = "system") {
@@ -27,9 +26,29 @@ export function openConnect(): void {
   try {
     addSystemMessage(`연결 시도 중...`, "system");
 
-    // SockJS endpoint로 등록한 주소를 포함하여 기입
-    // const socket = new SockJS("http://70.12.247.130:8080/ws");
-    const socket = new SockJS("https://i13a607.p.ssafy.io/ws");
+    const socket = new SockJS(import.meta.env.VITE_WS_BASE_URL);
+
+    const storageString = localStorage.getItem("auth-storage");
+    if (!storageString) {
+      addSystemMessage(
+        "🔒 인증 정보가 없습니다. WebSocket 연결을 중단합니다.",
+        "system"
+      );
+      return;
+    }
+
+    let storageItems;
+    try {
+      storageItems = JSON.parse(storageString);
+    } catch {
+      addSystemMessage("🔒 인증 정보 파싱 실패. 연결 중단", "system");
+      return;
+    }
+
+    // accessToken 존재 여부 확인
+    const accessToken = storageItems.state.accessToken;
+    const socialId = storageItems.state.user.socialId;
+    const nickname = storageItems.state.user.nickname;
 
     // Client 정의
     const stompClient = new Client({
@@ -38,9 +57,9 @@ export function openConnect(): void {
       },
       // ✅ userId를 헤더에 담아 서버로 전달
       connectHeaders: {
-        socialId: testuser2.username,
-        nickname: testuser2.nickname,
-        Authorization: `Bearer ${testuser2.Authorization}`,
+        socialId: socialId,
+        nickname: nickname,
+        Authorization: `Bearer ${accessToken}`,
       },
 
       // // 디버그 Logging 설정

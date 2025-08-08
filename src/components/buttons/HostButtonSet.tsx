@@ -1,15 +1,18 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { sendGameStart } from "@/websocket/sender";
+import useRoomStore from "@/stores/roomStore";
 
 const HostButtonSet = () => {
+  const roomId = useRoomStore((state) => state.roomId);
+  
   // // 이 함수에서는 게임 선택 Modal을 띄웁니다.
   // const onSelectProblem = () => {};
 
   // // 이 함수에서는 게임 시작 Logic이 들어가며, 방 상태를 바꿉니다.
   const onGameStart = () => {
     // API 요청 및 WS
-    sendGameStart(0);
+    sendGameStart(roomId);
   };
 
   return (

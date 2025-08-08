@@ -4,7 +4,7 @@ import useGameStore from "@/stores/gameStore";
 
 
 const HistoryList = () => {
-  const history = useGameStore.getState().gameHistory;
+  const history = useGameStore((state) => state.gameHistory);
 
   return (
     <ScrollArea className="h-full w-full p-4 rounded-md scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">

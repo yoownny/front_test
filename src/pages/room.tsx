@@ -2,49 +2,26 @@ import WaitingTemplate from "@/layouts/WaitingTemplate";
 import GameHostTemplate from "@/layouts/GameHostTemplate";
 import GamePlayerTemplate from "@/layouts/GamePlayerTemplate";
 import { useEffect, type ReactNode } from "react";
-import type { User } from "@/types/user";
 import { useParams } from "react-router-dom";
 import useRoomStore from "@/stores/roomStore";
 import { joinRoom, leaveRoom } from "@/websocket/subscription";
-import { mockDataDefaultProblem, mockDataPlayerList } from "@/mockdata";
-import useProblemStore from "@/stores/problemStore";
 import useWebsocketStore from "@/stores/useWebSocketStore";
+import useUserStore from "@/stores/userStore";
 
 const RoomPage = () => {
   // const players = useRoomStore((state) => state.players);
   const gameState = useRoomStore((state) => state.gameState);
-  const maxPlayers = useRoomStore((state) => state.maxPlayers);
-  const numPlayers = useRoomStore((state) => state.numPlayers);
   const hostId = useRoomStore((state) => state.hostId);
-  const setRoom = useRoomStore.getState().setRoom;
-  const setProblem = useProblemStore.getState().joinAsHost;
-  const players = mockDataPlayerList;
+  const userId = useUserStore((state) => state.userId);
+  const players = useRoomStore(state => state.players);
 
-  // const params = useParams();
-  // const roomId = Number(params.id);
-  const roomId = 0;
-
-  const currentPlayer: User = players[2];
+  const params = useParams();
+  const roomId = Number(params.id);
 
   useEffect(() => {
     useWebsocketStore.getState().setCurrentRoomId(roomId);
     joinRoom(roomId);
-    setRoom({
-      roomId: 0,
-      gameState: "IN_GAME",
-      maxPlayers: 6,
-      numPlayers: 3,
-      hostId: 1,
-      participants: mockDataPlayerList.map((player) => ({
-        id: player.id,
-        name: player.name,
-        isHost: player.isHost,
-        status: "READY",
-      })),
-    });
-    setProblem({
-      ...mockDataDefaultProblem,
-    });
+
     return () => {
       leaveRoom(roomId);
       useWebsocketStore.getState().setCurrentRoomId(null);
@@ -54,7 +31,7 @@ const RoomPage = () => {
   const templateStatus = (): ReactNode => {
     switch (gameState) {
       case "IN_GAME":
-        return currentPlayer.isHost ? (
+        return hostId === userId ? (
           <GameHostTemplate />
         ) : (
           <GamePlayerTemplate />

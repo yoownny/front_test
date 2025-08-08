@@ -1,71 +1,46 @@
+import type { SelectedProblem } from "@/types/problem/problem";
+import type { ProblemStoreType } from "./types";
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type { Problem } from "@/types/problem/problem";
 
-// 타입 재정의
-export type Difficulty = "EASY" | "NORMAL" | "HARD";
-export type ProblemType = "ORIGINAL" | "CUSTOM" | "AI";
-
-// 문제 저장소 타입 정의
-export interface ProblemStoreType {
-  problemId: string;
-  title: string;
-  content: string;
-  answer: string;
-  difficulty: Difficulty;
-  genres: string[];
-  createdBy: string;
-  problemType: ProblemType;
-
-  joinAsHost: (problem: Problem) => void;
-  joinAsPlayer: (problem: Problem) => void;
-  resetProblem: () => void;
+function applyProblem(problem: SelectedProblem, isHost: boolean) {
+  return {
+    problemId: problem.problemId,
+    title: problem.title,
+    content: problem.content,
+    answer: isHost ? problem.answer : "",
+    difficulty: problem.difficulty,
+    genres: problem.genres,
+    createdBy: problem.createdBy,
+    problemType: problem.problemType,
+  };
 }
 
-const useProblemStore = create<ProblemStoreType>()(
-  devtools((set) => ({
-    problemId: "",
-    title: "",
-    content: "",
-    answer: "",
-    difficulty: "NORMAL",
-    genres: [],
-    problemType: "ORIGINAL",
+const useProblemStore = create<ProblemStoreType>()((set) => ({
+  problemId: -1,
+  title: "",
+  content: "",
+  answer: "",
+  difficulty: "NORMAL",
+  genres: [],
+  createdBy: "",
+  problemType: "EXISTING",
 
-    joinAsHost: (problem: Problem) =>
-      set(() => ({
-        problemId: problem.problemId ?? "",
-        title: problem.title ?? "",
-        content: problem.content ?? "",
-        answer: problem.answer ?? "",
-        difficulty: (problem.difficulty ?? "NORMAL") as Difficulty,
-        genres: problem.genres ?? [],
-        problemType: (problem.problemType?.toUpperCase() ?? "ORIGINAL") as ProblemType,
-      })),
+  joinAsHost: (problem) => set(() => applyProblem(problem, true)),
+  joinAsPlayer: (problem) => set(() => applyProblem(problem, false)),
 
-    joinAsPlayer: (problem: Problem) =>
-      set(() => ({
-        problemId: problem.problemId ?? "",
-        title: problem.title ?? "",
-        content: problem.content ?? "",
-        answer: "", // 참가자에겐 정답 미노출
-        difficulty: (problem.difficulty ?? "NORMAL") as Difficulty,
-        genres: problem.genres ?? [],
-        problemType: (problem.problemType?.toUpperCase() ?? "ORIGINAL") as ProblemType,
-      })),
+  resetProblem: () =>
+    set(() => ({
+      problemId: -1,
+      title: "",
+      content: "",
+      answer: "",
+      difficulty: "NORMAL",
+      genres: [],
+      createdBy: "",
+      problemType: "EXISTING",
+    })),
 
-    resetProblem: () =>
-      set(() => ({
-        problemId: "",
-        title: "",
-        content: "",
-        answer: "",
-        difficulty: "NORMAL",
-        genres: [],
-        problemType: "ORIGINAL",
-      })),
-  }))
-);
-
+  endGame: (problem) => set(() => applyProblem(problem, true)),
+}));
 
 export default useProblemStore;

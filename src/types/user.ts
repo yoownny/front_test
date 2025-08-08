@@ -5,7 +5,7 @@ export interface User {
   id: number;
   name: string;
   isHost: boolean;
-  status: "STANDBY" | "READY" | "PLAYING";
+  status: "WAITING" | "READY" | "PLAYING";
 }
 
 export interface GamePlayer extends User {

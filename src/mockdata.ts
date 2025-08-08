@@ -203,7 +203,7 @@ export const testuser1 = {
   username: "social1111",
   nickname: "test1111",
   Authorization:
-    "eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInVzZXJJZCI6MSwibmlja25hbWUiOiJ0ZXN0MTExMSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzU0Mjk1ODAyLCJleHAiOjE3NTY4ODc4MDJ9.qe5oXJuK9JRLs7DVe7QJ-NJwrvfHqjV85Eo6k-Vzp1E",
+    "eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInVzZXJJZCI6MSwibmlja25hbWUiOiJ0ZXN0MTExMSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzU0NTI4Mzc3LCJleHAiOjE3NTQ2MTQ3Nzd9.sc3XOgPAyCUBq_lHR1hs9yN-BWIAPeik9vPm8BM2d90",
 };
 
 export const testuser2 = {
@@ -211,7 +211,7 @@ export const testuser2 = {
   username: "social2222",
   nickname: "test2222",
   Authorization:
-    "eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInVzZXJJZCI6Miwibmlja25hbWUiOiJ0ZXN0MjIyMiIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzU0Mjk1ODQyLCJleHAiOjE3NTY4ODc4NDJ9.ko5C5LWlRZ030VZHEnCX9l26fTl-47tamKWxdy3LU0g",
+    "eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsInVzZXJJZCI6Miwibmlja25hbWUiOiJ0ZXN0MjIyMiIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzU0NTI4MjAwLCJleHAiOjE3NTQ2MTQ2MDB9.68aopWooXDWJVLIsGRjHM8HpTUE9m4JR2FajbOxpnuk",
 };
 
 export const testuser3 = {

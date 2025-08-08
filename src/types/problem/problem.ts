@@ -10,7 +10,7 @@ export interface Problem {
   genres: string[]; // 1~3개
   createdBy: string;
   likes: number;    // 좋아요 수
-  problemType: 'ORIGINAL' | 'CUSTOM' | 'AI';
+  problemType: 'ORIGINAL' | 'CUSTOM';
 }
 
 // 선택된 문제 전용 interface 입니다.
@@ -24,5 +24,5 @@ export interface SelectedProblem {
   genres: string[];
   createdBy?: string;
   likes?: number;
-  problemType: 'ORIGINAL' | 'CUSTOM' | 'AI';
+  problemType: 'ORIGINAL' | 'CUSTOM';
 }

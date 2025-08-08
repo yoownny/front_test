@@ -49,7 +49,7 @@ const AnswerAssessButtonGroup = ({
           last:rounded-l-none
           not-first:border-l-0
           not-first:not-last:rounded-none"
-          onClick={() => onclick}
+          onClick={keys.onClick}
         >
           {keys.buttonLabel}
         </Button>

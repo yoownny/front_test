@@ -2,16 +2,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import useRoomStore from "@/stores/roomStore";
 import useUserStore from "@/stores/userStore";
+import { sendReady } from "@/websocket/sender";
 
 const PlayerButtonSet = () => {
-  const toggleReady = useRoomStore((state) => state.toggleReady);
   const players = useRoomStore((state) => state.players);
   const myUserId = useUserStore(state => state.userId);
 
-  const isReady = players.find((player) => player.id = myUserId)?.isReady;
+  const isReady = players.find((player) => player.id === myUserId)?.status === "READY";
   
   const onToggleReady = () => {
-    toggleReady(myUserId);
+    sendReady(0, !isReady);
   };
 
   return (
@@ -24,7 +24,7 @@ const PlayerButtonSet = () => {
         className="h-full text-[24px]"
         onClick={onToggleReady}
       >
-        {!isReady ? "게임 준비" : "준비 취소"}
+        {isReady ? "게임 준비" : "준비 취소"}
       </Button>
     </Card>
   );

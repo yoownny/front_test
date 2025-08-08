@@ -1,24 +1,22 @@
 // 게임방의 룸 상태 관리
 // import { mockDataPlayerList } from "@/mockdata";
 import type { ChatLog } from "@/types/chat";
-import type { RoomDetailResponse } from "@/types/room/roomDetail";
-import type { User } from "@/types/user";
 import type { RoomStoreType } from "./types/room";
 import { create } from "zustand";
 
 const useRoomStore = create<RoomStoreType>()((set) => ({
-  // initial state
   roomId: 0,
   gameState: "WAITING",
   numPlayers: 0,
   maxPlayers: 0,
-  hostId: -1,
+  hostId: 0,
   players: [],
   chattings: [],
   nextChatlogId: 0,
+  timeLimit: 0, // 분 기준
 
-  // 방 입장 State Logic
-  setRoom: (roomData: RoomDetailResponse) =>
+  // 방 입장
+  setRoom: (roomData) =>
     set(() => ({
       roomId: roomData.roomId,
       gameState: roomData.gameState,
@@ -26,88 +24,84 @@ const useRoomStore = create<RoomStoreType>()((set) => ({
       numPlayers: roomData.numPlayers,
       hostId: roomData.hostId,
       players: roomData.participants,
+      timeLimit: roomData.timeLimit,
     })),
 
-  // 방 나가기 및 삭제 State Logic
+  // 방 퇴장
   resetRoom: () =>
     set(() => ({
-      roomId: -1,
-      status: "WAITING",
+      roomId: 0,
+      gameState: "WAITING",
       maxPlayers: 0,
-      hostName: "",
+      numPlayers: 0,
+      hostId: 0,
       players: [],
       chattings: [],
       nextChatlogId: 0,
     })),
 
-  joinPlayer: (newPlayer: User, currentPlayers: number) =>
+  // 다른 플레이어 입장
+  joinPlayer: (newPlayer, currentPlayers) =>
     set((state) => ({
       players: [...state.players, newPlayer],
       numPlayers: currentPlayers,
     })),
 
-  // 채팅 상호작용 State Logic (system message도 포함)
-  addChatting: (username: string, content: string, timestamp: string) =>
+  // 다른 플레이어 퇴장
+  leavePlayer: (targetUserId) =>
+    set((state) => ({
+      players: state.players.filter((player) => player.id !== targetUserId),
+      numPlayers: state.numPlayers - 1,
+    })),
+
+  // 방장 퇴장
+  leaveHost: (playersNewList, newHostId) => set(() => ({
+    players: playersNewList,
+    hostId: newHostId
+  })),
+
+  // 채팅 내역 추가
+  addChatting: (username, content, timestamp) =>
     set((state) => {
-      const nowChatId = state.nextChatlogId;
+      const isDuplicate = state.chattings.some(
+        (c) =>
+          c.user === username &&
+          c.content === content &&
+          c.timestamp === timestamp
+      );
+      if (isDuplicate) return state;
+
       const newChatLog: ChatLog = {
-        id: nowChatId,
+        id: state.nextChatlogId,
         user: username,
-        content: content,
-        timestamp: timestamp,
+        content,
+        timestamp,
       };
 
       return {
-        chattings: [...state.chattings, newChatLog].sort((a, b) =>
-          a.timestamp.localeCompare(b.timestamp)
+        chattings: [...state.chattings, newChatLog].sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         ),
         nextChatlogId: state.nextChatlogId + 1,
       };
     }),
 
-  // 방장 변경 State Logic
-  setHost: (newHostId: number) =>
-    set((state) => {
-      const updatedplayerlist = state.players.map((player) => {
-        if (player.id === newHostId) {
-          // 새 Host ID 일치
-          return { ...player, isHost: true };
-        } else if (player.id === state.hostId) {
-          // 기존 Host name 일치
-          return { ...player, isHost: false };
-        }
-        // 둘다 아닌 경우 그대로
-        return player;
-      });
-
-      const newHost = updatedplayerlist.find(
-        (player) => player.id === newHostId
-      );
-
-      return {
-        players: updatedplayerlist,
-        hostName: newHost?.name,
-      };
-    }),
-
-  // 준비 상태 변경 State Logic
-  toggleReady: (userId: number) =>
-    set((state) => ({
-      players: state.players.map((player) =>
-        player.id === userId
-          ? {
-              ...player,
-              status: player.status === "STANDBY" ? "READY" : "STANDBY",
-            }
-          : player
-      ),
+  // 방장 변경
+  setHost: (room) =>
+    set(() => ({
+      roomId: room.roomId,
+      hostId: room.hostId,
+      players: room.players.map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status,
+        isHost: p.id === room.hostId,
+      })),
     })),
 
-  // 게임 시작 Logic
-  setStatus: () =>
-    set((state) => ({
-      gameState: state.gameState === "WAITING" ? "IN_GAME" : "WAITING",
-    })),
+  // 준비 상태 변경...?
+  updateStatus: (players) => set(() => ({ players })),
 }));
 
 export default useRoomStore;

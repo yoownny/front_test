@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { openConnect } from "@/websocket/webSocketConnection";
+import useUserStore from "@/stores/userStore";
 
 // Lazy-loaded pages
 const IndexPage = lazy(() => import("@/pages/index"));
@@ -13,33 +15,38 @@ const ProfilePage = lazy(() => import("@/pages/profile"));
 const RankingPage = lazy(() => import("@/pages/ranking"));
 
 function Router() {
-  return (
-      <Suspense
-        fallback={
-          <div className="flex justify-center items-center min-h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
-          </div>
-        }
-      >
-        <Routes>
-          <Route path="/" element={<IndexPage />} />
+  useEffect(() => {
+    useUserStore.getState().setUserFromStorage();
+    openConnect(); // 앱 시작 시 WebSocket 연결 시도
+  }, []);
 
-          <Route
-            path="/lobby"
-            element={
-              <ProtectedRoute>
-                <LobbyPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/room/:id"
-            element={
-              <ProtectedRoute>
-                <RoomPage />
-              </ProtectedRoute>
-            }
-          />
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+        </div>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<IndexPage />} />
+
+        <Route
+          path="/lobby"
+          element={
+            <ProtectedRoute>
+              <LobbyPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/room/:id"
+          element={
+            <ProtectedRoute>
+              <RoomPage />
+            </ProtectedRoute>
+          }
+        />
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />

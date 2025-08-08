@@ -1,9 +1,15 @@
 import useWebsocketStore from "@/stores/useWebSocketStore";
-import { onChat, onLobby, onPersonal, onHistory, onGameStart, onRoom } from "./handler";
+import {
+  onChat,
+  onLobby,
+  onPersonalGame,
+  onRoomSetting,
+  onHistory,
+  onRoom,
+} from "./handler";
 
 // Subscription 관리 함수
 const LOBBY_TOPIC = "/topic/lobby";
-const MY_TOPIC = "/user/queue/game";
 
 // 로비 입장 WS
 export function joinLobby() {
@@ -17,6 +23,7 @@ export function joinLobby() {
   });
 
   addSubscription(LOBBY_TOPIC, subscription);
+  console.log("로비 입장");
 }
 
 // 로비 퇴장 WS
@@ -29,7 +36,7 @@ export function leaveLobby() {
     removeSubscription(LOBBY_TOPIC);
   }
 
-  console.log("로비 퇴장 완료");
+  console.log("로비 퇴장");
 }
 
 // 개인 메시지 채널 구독 추가 WS (로그인의 경우)
@@ -38,25 +45,35 @@ export function joinMyMsg() {
   const { addSubscription } = useWebsocketStore.getState();
   if (!stompClient) return;
 
-  const subscription = stompClient.subscribe(MY_TOPIC, (message) => {
-    const response = JSON.parse(message.body);
-    onPersonal(response);
-  });
+  const subsData = [
+    { topic: "/user/queue/game", handler: onPersonalGame },
+    { topic: "/user/queue/room", handler: onRoomSetting },
+  ];
 
-  addSubscription(MY_TOPIC, subscription);
+  subsData.forEach(({ topic, handler }) => {
+    const subscription = stompClient.subscribe(topic, (msg) => {
+      const data = JSON.parse(msg.body);
+      handler(data);
+    });
+    addSubscription(topic, subscription);
+  });
 }
 
 // 개인 메시지 채널 구독 삭제 WS (로그아웃의 경우)
 export function leaveMyMsg() {
-  const { getSubscription, removeSubscription } = useWebsocketStore.getState();
-  const subscription = getSubscription(MY_TOPIC);
+  const { getAllSubscriptions, removeSubscription } = useWebsocketStore.getState();
 
-  if (subscription) {
-    subscription.unsubscribe();
-    removeSubscription(MY_TOPIC);
-  }
+  const topicsToLeave = ["/user/queue/game", "/user/queue/room"];
 
-  console.log("로비 퇴장 완료");
+  topicsToLeave.forEach((topic) => {
+    const subscription = getAllSubscriptions()[topic];
+    if (subscription) {
+      subscription.unsubscribe();
+      removeSubscription(topic);
+    }
+  });
+
+  console.log("로그아웃");
 }
 
 // 방 입장 WS
@@ -70,7 +87,6 @@ export function joinRoom(roomId: number) {
     { topic: `/topic/games/${roomId}`, handler: onRoom },
     { topic: `/topic/games/${roomId}/chat`, handler: onChat },
     { topic: `/topic/games/${roomId}/history`, handler: onHistory },
-    { topic: `/topic/games/${roomId}/start`, handler: onGameStart },
   ];
 
   subsData.forEach(({ topic, handler }) => {
@@ -81,7 +97,7 @@ export function joinRoom(roomId: number) {
     addSubscription(topic, subscription);
   });
 
-  console.log(`방 ${roomId} 입장 및 구독 완료`);
+  console.log(`${roomId}번 방 입장`);
 }
 
 // 방 퇴장 WS
@@ -93,7 +109,6 @@ export function leaveRoom(roomId: number) {
     `/topic/games/${roomId}`,
     `/topic/games/${roomId}/chat`,
     `/topic/games/${roomId}/history`,
-    `/topic/games/${roomId}/start`,
   ];
 
   topicsToLeave.forEach((topic) => {
@@ -104,5 +119,5 @@ export function leaveRoom(roomId: number) {
     }
   });
 
-  console.log(`방 ${roomId} 퇴장 및 구독 해제 완료`);
+  console.log(`${roomId}번 방 퇴장`);
 }

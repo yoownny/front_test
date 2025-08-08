@@ -15,8 +15,9 @@ export interface RoomStoreType {
   setRoom: (roomData: RoomDetailResponse) => void;
   resetRoom: () => void;
   joinPlayer: (newPlayer: User, currentPlayers: number) => void;
+  leavePlayer: (targetUserId: number) => void;
+  leaveHost: (playersNewList: User[], newHostId: number) => void;
   addChatting: (username: string, content: string, timestamp: string) => void;
-  setHost: (newHostId: number) => void;
-  toggleReady: (userId: number) => void;
-  setStatus: () => void;
+  setHost: (room: { roomId: number; hostId: number; players: User[] }) => void;
+  updateStatus: (players: User[]) => void;
 }

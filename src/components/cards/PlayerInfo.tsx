@@ -23,7 +23,7 @@ const PlayerInfo = ({ user }: PlayerInfoProps) => {
       return (
         <div>
           {user.isHost && <Crown className="w-5 h-5 text-yellow-500" />}
-          {user.isReady && (
+          {user.status === "READY" && (
             <CircleCheckBig className="w-5 h-5 text-green-500" />
           )}
         </div>

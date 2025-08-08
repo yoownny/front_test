@@ -19,12 +19,12 @@ function GameHostTemplate() {
         <GameRoomChatSection />
 
         {/* 문제/질문 응답 섹션 */}
-        <div className="max-h-[1000px] col-span-2 grid grid-rows-2 gap-4">
+        <div className="max-h-[700px] col-span-2 grid grid-rows-2 gap-4">
           {/* 현재 문제 정보 */}
           <InGameProblemInfo />
 
           {/* 질문 응답 영역 */}
-          {currentQuestion?.type === "answer" ? (
+          {currentQuestion?.type === "GUESS" ? (
             <InGamePlayerAnswer />
           ) : (
             <InGamePlayerQuestion />

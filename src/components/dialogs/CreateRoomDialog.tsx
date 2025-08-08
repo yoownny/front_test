@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Dialog,
@@ -17,6 +17,8 @@ import ProblemDrawer from "../drawers/ProblemDrawer";
 import type { SelectedProblem } from "@/types/problem/problem";
 import type { CreateRoomRequest } from "@/types/room/roomRequest";
 import { sendCreateRoom } from "@/websocket/sender";
+import { useNavigate } from "react-router-dom";
+import useRoomStore from "@/stores/roomStore";
 
 const CreateRoomDialog = () => {
   const [selectedProblem, setSelectedProblem] =
@@ -24,6 +26,8 @@ const CreateRoomDialog = () => {
   const [maxPlayers, setMaxPlayers] = useState<string>("");
   const [timeLimit, setTimeLimit] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const roomId = useRoomStore(state => state.roomId);
 
   // ProblemDrawer에서 선택된 사건 정보를 받는 핸들러
   const handleProblemSelect = (problem: SelectedProblem) => {
@@ -49,7 +53,10 @@ const CreateRoomDialog = () => {
       console.log("방 생성 데이터:", roomData);
 
       // 실제 API 호출 로직 필요
-      // await createRoom(roomData);
+      sendCreateRoom(Number(maxPlayers), Number(timeLimit), {
+        problemId: String(selectedProblem.problemId),
+        problemType: selectedProblem.problemType,
+      });
 
       // 테스트용 alert
       alert(
@@ -60,10 +67,8 @@ const CreateRoomDialog = () => {
       );
 
       handleCloseDialog();
-      sendCreateRoom(Number(maxPlayers), Number(timeLimit), {
-        problemId: String(selectedProblem.problemId),
-        problemType: selectedProblem.problemType,
-      });
+
+      navigate(`/room/${roomId}`);
     } catch (error) {
       console.error("사건 파일 생성 실패:", error);
       alert("사건 파일 생성에 실패했습니다.");

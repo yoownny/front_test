@@ -33,8 +33,7 @@ const useWebsocketStore = create<WebsocketStoreType>((set, get) => ({
   // 구독 채널 추가
   addSubscription: (topic: string, sub: StompSubscription) =>
     set((state) => ({
-      ...state.subscriptions,
-      [topic]: sub,
+      subscriptions: { ...state.subscriptions, [topic]: sub },
     })),
 
   // 구독 채널 Search

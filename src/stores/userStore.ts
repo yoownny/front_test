@@ -1,26 +1,34 @@
-// 로그인 시 저장할 상태 정보
-import { testuser1, testuser2 } from "@/mockdata";
 import { create } from "zustand";
 
-interface userStoreType {
+interface UserStoreType {
   userId: number;
   userName: string;
-  
+  setUserFromStorage: () => void;
   setUser: (id: number, name: string) => void;
 }
 
-const useUserStore = create<userStoreType>()((set) => ({
-  // userId: -1,
-  // username: "",
-  userId: testuser1.userId,
-  userName: testuser1.username,
-  
-  // Login 후 본인 User 정보 설정
-  setUser: (id: number, name: string) => set(() => ({
-    userId: id,
-    userName: name,
-  }))
+const useUserStore = create<UserStoreType>()((set) => ({
+  userId: -1,
+  userName: "",
 
+  setUser: (id, name) => set({ userId: id, userName: name }),
+
+  setUserFromStorage: () =>
+    set((state) => {
+      try {
+        const jsonData = localStorage.getItem("auth-storage");
+        if (!jsonData) return state;
+
+        const userData = JSON.parse(jsonData).state.user;
+        return {
+          userId: userData.userId,
+          userName: userData.nickname,
+        };
+      } catch (e) {
+        console.error("유저 정보 파싱 실패:", e);
+        return state;
+      }
+    }),
 }));
 
 export default useUserStore;

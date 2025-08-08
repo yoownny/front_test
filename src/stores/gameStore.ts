@@ -1,10 +1,9 @@
 // 게임방의 룸 상태 관리
 import { AnswerStatus, type Interaction } from "@/types/game/game";
-import type { GamePlayer } from "@/types/user";
 import type { GameStoreType } from "./types";
 import { create } from "zustand";
 
-const useGameStore = create<GameStoreType>()((set, get) => ({
+const useGameStore = create<GameStoreType>()((set) => ({
   // Initial State
   // 게임 정보
   roomId: -1,
@@ -12,115 +11,109 @@ const useGameStore = create<GameStoreType>()((set, get) => ({
   remainingQuestions: 0,
   totalQuestions: 0,
 
-  // 질문 정보
+  currentPlayer: null,
   currentQuestion: null,
   gameHistory: [],
-
-  // 게임
   currentTimer: 0,
 
-  // State Logic 별도
+  // 결과 정보
+  winnerId: 0,
+  winnerName: "",
+  submitted_answer: "",
+  playTime: "",
+  totalQuestionCount: 0,
+
+  // 기타 정보
   nextInteractionId: 1,
 
-  // 게임 시작 State Logic
-  // gameStart: (
-  //   roomId: number,
-  //   playerList: GamePlayer[],
-  //   remainingQuestions: number,
-  //   totalQuestions: number,
-  //   targetUserId: number,
-  //   targetUsername: string
-  // ) =>
-  //   set(() => ({
-  //     roomId: roomId,
-  //     players: playerList,
-  //     remainingQuestions,
-  //     totalQuestions,
-  //     currentQuestionerId: targetUserId,
-  //     currentQuestionerName: targetUsername,
-  //   })),
   gameStart: (
-    roomId: number,
-    playerList: GamePlayer[],
-    remainingQuestions: number,
-    totalQuestions: number
+    roomId,
+    playerList,
+    remainingQuestions,
+    totalQuestions,
+    currentPlayer
   ) =>
     set(() => ({
-      roomId: roomId,
+      roomId,
       players: playerList,
       remainingQuestions,
       totalQuestions,
+      currentPlayer,
       currentQuestion: null,
       gameHistory: [],
+      submitted_answer: "",
       currentTimer: 0,
       nextInteractionId: 1,
     })),
 
-  // 참가자 질문 및 답변 State Logic
-  addInteraction: (
-    type: "question" | "answer",
-    playerId: number,
-    content: string
-  ) =>
+  addInteraction: (type, playerId, content) =>
     set((state) => {
-      const newInteraction: Interaction = {
-        id: playerId,
-        username:
-          state.players.find((player) => player.id == playerId)?.name ??
-          "Unknown",
-        type,
-        content,
-        status: AnswerStatus.PENDING,
-      };
-
+      const username =
+        state.players.find((p) => p.id === playerId)?.name ?? "Unknown";
       return {
-        currentQuestion: newInteraction,
+        currentQuestion: {
+          id: playerId,
+          username,
+          type,
+          content,
+          status: AnswerStatus.PENDING,
+        },
       };
     }),
 
-  // 방장 (질문 및 답변) 응답 State Logic
-  addHistory: (
-    type: "question" | "answer",
-    playerId: number,
-    content: string,
-    replyContent: AnswerStatus
-  ) =>
+  addHistory: (type, playerId, content, replyContent) =>
     set((state) => {
+      if (!content.trim()) return {};
+
+      const username =
+        state.players.find((p) => p.id === playerId)?.name ?? "Unknown";
       const newInteraction: Interaction = {
-        id: playerId,
-        username:
-          state.players.find((player) => player.id == playerId)?.name ??
-          "Unknown",
+        id: state.nextInteractionId,
+        username,
         type,
         content,
         status: replyContent,
       };
 
+      const isDuplicate = state.gameHistory.some(
+        (h) =>
+          h.type === type &&
+          h.username === username &&
+          h.content === content &&
+          h.status === replyContent
+      );
+
+      if (isDuplicate) return state;
       return {
+        currentQuestion: null,
         gameHistory: [...state.gameHistory, newInteraction],
         nextInteractionId: state.nextInteractionId + 1,
       };
     }),
 
-  // 턴 넘기기 State Logic
-  // turnOver: (targetUserId: number) =>
-  //   set(() => ({
-  //     currentQuestionerId: targetUserId,
-  //   })),
+  turnOver: (targetUserId) =>
+    set((state) => ({
+      currentPlayer: state.players.find((p) => p.id === targetUserId) ?? null,
+    })),
 
-  // Server와 Client Timer Sync 맞추기
-  syncTimer: (remainingTime: number) => {
-    set({ currentTimer: remainingTime });
-  },
+  syncTimer: (remainingTime) => set({ currentTimer: remainingTime }),
 
-  // 게임 종료 State Logic
-  gameOver: () =>
+  gameOver: (userId, nickname, content, questionCnt, playTime) =>
+    set(() => ({
+      winnerId: userId,
+      winnerName: nickname,
+      submitted_answer: content,
+      playTime: playTime,
+      totalQuestionCount: questionCnt,
+    })),
+
+  gameClosed: () =>
     set(() => ({
       players: [],
       currentQuestion: null,
       gameHistory: [],
       currentTimer: 0,
-      nextInteractionId: 0,
+      nextInteractionId: 1,
     })),
 }));
 

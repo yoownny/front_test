@@ -5,7 +5,7 @@
 export interface Interaction {
   id: number;
   username: string;
-  type: "question" | "answer";
+  type: "QUESTION" | "GUESS";
   content: string;
   status: AnswerStatus;
 };

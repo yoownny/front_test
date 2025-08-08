@@ -1,5 +1,5 @@
 import type { AnswerStatus, Interaction } from "@/types/game/game";
-import type { GamePlayer } from "@/types/user";
+import type { GamePlayer, User } from "@/types/user";
 
 export interface GameStoreType {
   // 게임 정보
@@ -9,8 +9,16 @@ export interface GameStoreType {
   totalQuestions: number;
 
   // 질문 정보
+  currentPlayer: User | null;
   currentQuestion: Interaction | null;
   gameHistory: Interaction[];
+
+  // 결과 정보
+  submitted_answer: string;
+  winnerId: number;
+  winnerName: string;
+  playTime: string;
+  totalQuestionCount: number;
 
   // 게임
   currentTimer: number;
@@ -22,22 +30,30 @@ export interface GameStoreType {
     roomId: number,
     playerList: GamePlayer[],
     remainingQuestions: number,
-    totalQuestions: number
+    totalQuestions: number,
+    currentPlayer: User
   ) => void;
 
   addInteraction: (
-    type: "question" | "answer",
+    type: "QUESTION" | "GUESS",
     playerId: number,
     content: string
   ) => void;
 
   addHistory: (
-    type: "question" | "answer",
+    type: "QUESTION" | "GUESS",
     playerId: number,
     content: string,
     replyContent: AnswerStatus
   ) => void;
-  // turnOver: (targetUserId: number) => void;
+  turnOver: (targetUserId: number) => void;
   syncTimer: (remainingTime: number) => void;
-  gameOver: () => void;
+  gameOver: (
+    userId: number,
+    nickname: string,
+    content: string,
+    questionCnt: number,
+    playTime: string
+  ) => void;
+  gameClosed: () => void;
 }

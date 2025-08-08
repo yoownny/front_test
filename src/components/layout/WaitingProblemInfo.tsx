@@ -20,13 +20,13 @@ const WaitingProblemInfo = () => {
 
   return (
     <>
-      <Card className="grid grid-flow-col grid-rows-5 p-4">
+      <Card className="grid grid-flow-col grid-rows-4 p-4 max-h-[400px]">
         <Card className="align-center">
-          <span className="align-center text-2xl pl-4">{problemContent}</span>
+          <span className="align-center text-2xl pl-6">{problemContent}</span>
         </Card>
-        <Card className="row-span-4 h-full p-8">
+        <Card className="row-span-3 h-full p-4">
           {isNew ? (
-            <p className="text-[24px]">{problemAnswer}</p>
+            <p className="text-[24px] overflow-y-auto">{problemAnswer}</p>
           ) : (
             <div className="space-y-8">
               {layers.map((index) => (

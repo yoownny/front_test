@@ -10,7 +10,7 @@ const ChatList = () => {
   useEffect(() => {
     // chatLogs가 변경될 때마다 스크롤을 가장 아래로 이동
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatLogs]);
   
@@ -20,7 +20,8 @@ const ChatList = () => {
         {chatLogs.map((log) => (
           <ChatItem key={log.id} log={log} />
         ))}
-      </div>
+        <div ref={scrollRef} />
+      </div >
     </ScrollArea>
   );
 };

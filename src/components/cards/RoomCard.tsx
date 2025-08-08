@@ -17,7 +17,7 @@ interface RoomCardProps {
 const RoomCard: React.FC<RoomCardProps> = ({ room, onClick }) => {
   // [대기중] 상태만 클릭하도록 제어
   const handleClick = () => {
-    if (room.gameState === "waiting") {
+    if (room.gameState === "WAITING") {
       onClick(room.roomId);
     }
   };
@@ -43,12 +43,12 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onClick }) => {
 
   // 게임방 상태 구분
   const gameStateConfig = {
-    waiting: {
+    "WAITING": {
       icon: "🟢",
       color: "bg-blue-100 text-blue-800",
       label: "🟢 대기 중",
     },
-    in_game: {
+    "IN_GAME": {
       icon: "🔴",
       color: "bg-red-100 text-red-800",
       label: "🔴 수사 중",

@@ -15,7 +15,7 @@ const PlayerListPanel = () => {
         id: -index - 1, // 음수로 임시 고유 id
         name: "",
         isHost: false,
-        isReady: true,
+        status: "READY",
       })),
   ];
 
